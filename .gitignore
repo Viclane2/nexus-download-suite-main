@@ -1,0 +1,10 @@
+/out/
+/dist/
+/data/
+/*.jar
+.idea/
+*.class
+*.log
+*.ser
+/dist_jpackage/
+/out_jar/
