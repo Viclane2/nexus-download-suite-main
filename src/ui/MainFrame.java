@@ -86,9 +86,9 @@ public class MainFrame extends JFrame implements ProgressionListener {
 
     private void creerDossierTelechargement() {
         File dossier = new File(dossierTelechargement);
-        if (!dossier.exists()) {
-            dossier.mkdirs();
-        }
+        if (!dossier.exists()) dossier.mkdirs();
+        // Créer les sous-dossiers de catégories
+        core.CategoriseurFichier.creerSousDossiers(dossierTelechargement);
     }
 
     private void appliquerApparence() {

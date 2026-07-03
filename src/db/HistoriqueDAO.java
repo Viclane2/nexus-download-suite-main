@@ -1,5 +1,6 @@
 package db;
 
+import auth.SessionManager;
 import core.StatutTache;
 import core.TacheTelechargement;
 
@@ -25,6 +26,7 @@ public class HistoriqueDAO {
     private static final String SQL_CREATE_TABLE = """
         CREATE TABLE IF NOT EXISTS historique_telechargements (
             id                  VARCHAR(36)     PRIMARY KEY,
+            utilisateur_id      INT             NOT NULL DEFAULT -1,
             nom_fichier         VARCHAR(512)    NOT NULL,
             url_source          TEXT            NOT NULL,
             chemin_destination  VARCHAR(512)    NOT NULL,
@@ -40,8 +42,8 @@ public class HistoriqueDAO {
 
     private static final String SQL_UPSERT = """
         INSERT INTO historique_telechargements
-            (id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, utilisateur_id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             taille_mo          = VALUES(taille_mo),
             progression        = VALUES(progression),
@@ -53,8 +55,9 @@ public class HistoriqueDAO {
         """;
 
     private static final String SQL_SELECT_ALL = """
-        SELECT id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin
+        SELECT id, utilisateur_id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin
         FROM historique_telechargements
+        WHERE utilisateur_id = ?
         ORDER BY date_debut DESC;
         """;
 
@@ -89,18 +92,21 @@ public class HistoriqueDAO {
         Connection conn = DatabaseManager.getInstance().getConnection();
         if (conn == null) return;
 
+        int utilisateurId = SessionManager.getInstance().getUtilisateurId();
+
         try (PreparedStatement ps = conn.prepareStatement(SQL_UPSERT)) {
             ps.setString(1, tache.getId());
-            ps.setString(2, tache.getNomFichier());
-            ps.setString(3, tache.getUrlSource());
-            ps.setString(4, tache.getCheminDestination());
-            ps.setDouble(5, tache.getTailleTotaleMo());
-            ps.setDouble(6, tache.getProgression());
-            ps.setLong  (7, tache.getOctetsRecus());
-            ps.setString(8, tache.getStatut().name());
-            ps.setString(9, tache.getHashSha256());       // null si pas encore calculé
-            ps.setObject(10, tache.getDateDebut());
-            ps.setObject(11, tache.getDateFin());
+            ps.setInt   (2, utilisateurId);
+            ps.setString(3, tache.getNomFichier());
+            ps.setString(4, tache.getUrlSource());
+            ps.setString(5, tache.getCheminDestination());
+            ps.setDouble(6, tache.getTailleTotaleMo());
+            ps.setDouble(7, tache.getProgression());
+            ps.setLong  (8, tache.getOctetsRecus());
+            ps.setString(9, tache.getStatut().name());
+            ps.setString(10, tache.getHashSha256());
+            ps.setObject(11, tache.getDateDebut());
+            ps.setObject(12, tache.getDateFin());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("[DAO] Erreur sauvegarder : " + e.getMessage());
@@ -116,35 +122,39 @@ public class HistoriqueDAO {
         Connection conn = DatabaseManager.getInstance().getConnection();
         if (conn == null) return liste;
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs   = stmt.executeQuery(SQL_SELECT_ALL)) {
+        int utilisateurId = SessionManager.getInstance().getUtilisateurId();
 
-            while (rs.next()) {
-                String id               = rs.getString("id");
-                String nomFichier       = rs.getString("nom_fichier");
-                String urlSource        = rs.getString("url_source");
-                String cheminDest       = rs.getString("chemin_destination");
-                double tailleMo         = rs.getDouble("taille_mo");
-                double progression      = rs.getDouble("progression");
-                long   octetsRecus      = rs.getLong("octets_recus");
-                String statutStr        = rs.getString("statut");
-                String hashSha256       = rs.getString("hash_sha256");
-                LocalDateTime dateDebut = rs.getObject("date_debut", LocalDateTime.class);
-                LocalDateTime dateFin   = rs.getObject("date_fin",   LocalDateTime.class);
+        try (PreparedStatement ps = conn.prepareStatement(SQL_SELECT_ALL)) {
+            ps.setInt(1, utilisateurId);
+            try (ResultSet rs = ps.executeQuery()) {
 
-                StatutTache statut;
-                try {
-                    statut = StatutTache.valueOf(statutStr);
-                } catch (IllegalArgumentException e) {
-                    statut = StatutTache.ERREUR;
+                while (rs.next()) {
+                    String id               = rs.getString("id");
+                    String nomFichier       = rs.getString("nom_fichier");
+                    String urlSource        = rs.getString("url_source");
+                    String cheminDest       = rs.getString("chemin_destination");
+                    double tailleMo         = rs.getDouble("taille_mo");
+                    double progression      = rs.getDouble("progression");
+                    long   octetsRecus      = rs.getLong("octets_recus");
+                    String statutStr        = rs.getString("statut");
+                    String hashSha256       = rs.getString("hash_sha256");
+                    LocalDateTime dateDebut = rs.getObject("date_debut", LocalDateTime.class);
+                    LocalDateTime dateFin   = rs.getObject("date_fin",   LocalDateTime.class);
+
+                    StatutTache statut;
+                    try {
+                        statut = StatutTache.valueOf(statutStr);
+                    } catch (IllegalArgumentException e) {
+                        statut = StatutTache.ERREUR;
+                    }
+
+                    TacheTelechargement t = TacheTelechargement.depuisBD(
+                            id, nomFichier, urlSource, cheminDest,
+                            tailleMo, progression, octetsRecus, statut, hashSha256, dateDebut, dateFin
+                    );
+                    liste.add(t);
                 }
-
-                TacheTelechargement t = TacheTelechargement.depuisBD(
-                        id, nomFichier, urlSource, cheminDest,
-                        tailleMo, progression, octetsRecus, statut, hashSha256, dateDebut, dateFin
-                );
-                liste.add(t);
-            }
+            } // fin try ResultSet
         } catch (SQLException e) {
             System.err.println("[DAO] Erreur chargerTous : " + e.getMessage());
         }

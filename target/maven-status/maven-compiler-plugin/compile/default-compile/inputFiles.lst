@@ -1,4 +1,6 @@
 /home/viclane/nexus-download-suite-main/src/Main.java
+/home/viclane/nexus-download-suite-main/src/auth/SessionManager.java
+/home/viclane/nexus-download-suite-main/src/core/CategoriseurFichier.java
 /home/viclane/nexus-download-suite-main/src/core/GestionnaireTaches.java
 /home/viclane/nexus-download-suite-main/src/core/ITask.java
 /home/viclane/nexus-download-suite-main/src/core/ProgressionListener.java
@@ -7,6 +9,8 @@
 /home/viclane/nexus-download-suite-main/src/core/TelechargementEchoueException.java
 /home/viclane/nexus-download-suite-main/src/db/DatabaseManager.java
 /home/viclane/nexus-download-suite-main/src/db/HistoriqueDAO.java
+/home/viclane/nexus-download-suite-main/src/db/UtilisateurDAO.java
+/home/viclane/nexus-download-suite-main/src/model/Utilisateur.java
 /home/viclane/nexus-download-suite-main/src/persistence/GestionnairePersistance.java
 /home/viclane/nexus-download-suite-main/src/persistence/HTMLExporter.java
 /home/viclane/nexus-download-suite-main/src/persistence/IPersistance.java
@@ -14,6 +18,7 @@
 /home/viclane/nexus-download-suite-main/src/threading/MoteurTelechargement.java
 /home/viclane/nexus-download-suite-main/src/ui/HeaderPanel.java
 /home/viclane/nexus-download-suite-main/src/ui/LigneTachePanel.java
+/home/viclane/nexus-download-suite-main/src/ui/LoginFrame.java
 /home/viclane/nexus-download-suite-main/src/ui/MainFrame.java
 /home/viclane/nexus-download-suite-main/src/ui/SplashScreen.java
 /home/viclane/nexus-download-suite-main/src/ui/StatistiquesPanel.java
