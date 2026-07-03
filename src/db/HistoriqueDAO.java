@@ -30,7 +30,9 @@ public class HistoriqueDAO {
             chemin_destination  VARCHAR(512)    NOT NULL,
             taille_mo           DOUBLE          DEFAULT -1,
             progression         DOUBLE          DEFAULT 0,
+            octets_recus        BIGINT          DEFAULT 0,
             statut              VARCHAR(20)     NOT NULL,
+            hash_sha256         VARCHAR(64)     DEFAULT NULL,
             date_debut          DATETIME,
             date_fin            DATETIME
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -38,18 +40,20 @@ public class HistoriqueDAO {
 
     private static final String SQL_UPSERT = """
         INSERT INTO historique_telechargements
-            (id, nom_fichier, url_source, chemin_destination, taille_mo, progression, statut, date_debut, date_fin)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             taille_mo          = VALUES(taille_mo),
             progression        = VALUES(progression),
+            octets_recus       = VALUES(octets_recus),
             statut             = VALUES(statut),
+            hash_sha256        = VALUES(hash_sha256),
             date_debut         = VALUES(date_debut),
             date_fin           = VALUES(date_fin);
         """;
 
     private static final String SQL_SELECT_ALL = """
-        SELECT id, nom_fichier, url_source, chemin_destination, taille_mo, progression, statut, date_debut, date_fin
+        SELECT id, nom_fichier, url_source, chemin_destination, taille_mo, progression, octets_recus, statut, hash_sha256, date_debut, date_fin
         FROM historique_telechargements
         ORDER BY date_debut DESC;
         """;
@@ -92,9 +96,11 @@ public class HistoriqueDAO {
             ps.setString(4, tache.getCheminDestination());
             ps.setDouble(5, tache.getTailleTotaleMo());
             ps.setDouble(6, tache.getProgression());
-            ps.setString(7, tache.getStatut().name());
-            ps.setObject(8, tache.getDateDebut());   // LocalDateTime → DATETIME
-            ps.setObject(9, tache.getDateFin());     // null si pas encore fini
+            ps.setLong  (7, tache.getOctetsRecus());
+            ps.setString(8, tache.getStatut().name());
+            ps.setString(9, tache.getHashSha256());       // null si pas encore calculé
+            ps.setObject(10, tache.getDateDebut());
+            ps.setObject(11, tache.getDateFin());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("[DAO] Erreur sauvegarder : " + e.getMessage());
@@ -120,7 +126,9 @@ public class HistoriqueDAO {
                 String cheminDest       = rs.getString("chemin_destination");
                 double tailleMo         = rs.getDouble("taille_mo");
                 double progression      = rs.getDouble("progression");
+                long   octetsRecus      = rs.getLong("octets_recus");
                 String statutStr        = rs.getString("statut");
+                String hashSha256       = rs.getString("hash_sha256");
                 LocalDateTime dateDebut = rs.getObject("date_debut", LocalDateTime.class);
                 LocalDateTime dateFin   = rs.getObject("date_fin",   LocalDateTime.class);
 
@@ -133,7 +141,7 @@ public class HistoriqueDAO {
 
                 TacheTelechargement t = TacheTelechargement.depuisBD(
                         id, nomFichier, urlSource, cheminDest,
-                        tailleMo, progression, statut, dateDebut, dateFin
+                        tailleMo, progression, octetsRecus, statut, hashSha256, dateDebut, dateFin
                 );
                 liste.add(t);
             }
