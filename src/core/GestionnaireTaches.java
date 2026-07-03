@@ -1,5 +1,7 @@
 package core;
 
+import db.HistoriqueDAO;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -27,12 +29,37 @@ public class GestionnaireTaches {
     private final List<TacheTelechargement> taches = new CopyOnWriteArrayList<>();
     private double volumeTotalTelechargeMo = 0.0;
 
+    // ── Persistance MySQL ────────────────────────────────────────────────────
+    private final HistoriqueDAO dao = new HistoriqueDAO();
+
+    /**
+     * Initialise la connexion et crée la table si besoin.
+     * À appeler une seule fois au démarrage de l'appli.
+     */
+    public void initialiserBD() {
+        dao.initialiserTable();
+        // Charger l'historique existant depuis la base
+        List<TacheTelechargement> historique = dao.chargerTous();
+        taches.addAll(historique);
+        System.out.println("[BD] " + historique.size() + " tâche(s) chargée(s) depuis MySQL.");
+    }
+
+    /**
+     * Sauvegarde une tâche dans la base (insert ou update).
+     */
+    public void sauvegarderEnBD(TacheTelechargement tache) {
+        dao.sauvegarder(tache);
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     public void ajouter(TacheTelechargement tache) {
         taches.add(tache);
+        dao.sauvegarder(tache); // Persistance immédiate à l'ajout
     }
 
     public void retirer(TacheTelechargement tache) {
         taches.remove(tache);
+        dao.supprimerParId(tache.getId()); // Suppression en BD aussi
     }
 
     public List<TacheTelechargement> lister() {

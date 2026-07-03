@@ -1,6 +1,7 @@
 package ui;
 
 import core.*;
+import db.DatabaseManager;
 import persistence.GestionnairePersistance;
 import threading.MoteurTelechargement;
 import ui.components.FuturisticButton;
@@ -73,9 +74,10 @@ public class MainFrame extends JFrame implements ProgressionListener {
         setContentPane(fondParticules);
 
         construireInterface();
+        gestionnaireTaches.initialiserBD(); // Connexion MySQL + chargement historique
         chargerHistorique();
         gererFermeture();
-        
+
         // Démarrer le rafraîchissement d'animation
         demarrerTimerAnimation();
 
@@ -180,11 +182,11 @@ public class MainFrame extends JFrame implements ProgressionListener {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int w = getWidth();
                 int h = getHeight();
-                
+
                 // Fond sombre
                 g2.setColor(new Color(15, 23, 42, 220));
                 g2.fillRoundRect(0, 0, w, h, 8, 8);
-                
+
                 // Bordure néon si focused
                 if (isFocusOwner()) {
                     g2.setColor(Theme.ACCENT_CYAN);
@@ -196,10 +198,10 @@ public class MainFrame extends JFrame implements ProgressionListener {
                     g2.setStroke(new BasicStroke(1.0f));
                     g2.drawRoundRect(0, 0, w - 1, h - 1, 8, 8);
                 }
-                
+
                 g2.dispose();
                 super.paintComponent(g);
-                
+
                 // Placeholder
                 if (getText().isEmpty() && !isFocusOwner()) {
                     Graphics2D g2d = (Graphics2D) g.create();
@@ -247,28 +249,28 @@ public class MainFrame extends JFrame implements ProgressionListener {
                     "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         // Vérifier que l'URL commence par http:// ou https://
         if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
             urlStr = "https://" + urlStr;
         }
-        
+
         try {
             // Valider l'URL
             java.net.URL url = new java.net.URL(urlStr);
-            
+
             // Extraire le nom du fichier
             String nomFichier = extraireNomFichier(urlStr);
-            
+
             // Ajouter et lancer la tâche
             ajouterEtLancerTache(nomFichier, urlStr);
             champUrl.setText("");
-            
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "L'URL saisie est invalide.\n" +
-                    "Assurez-vous qu'elle commence par http:// ou https://\n" +
-                    "Exemple: https://example.com/fichier.zip",
+                            "Assurez-vous qu'elle commence par http:// ou https://\n" +
+                            "Exemple: https://example.com/fichier.zip",
                     "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -292,9 +294,9 @@ public class MainFrame extends JFrame implements ProgressionListener {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 // Fond translucide
-                g2.setColor(new Color(6, 9, 15, 220)); 
+                g2.setColor(new Color(6, 9, 15, 220));
                 g2.fillRect(0, 0, getWidth(), getHeight());
-                
+
                 // Fine bordure verticale à droite
                 g2.setColor(Theme.BORDURE_CARTE);
                 g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
@@ -420,7 +422,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
             for (LigneTachePanel ligne : lignesParId.values()) {
                 ligne.animerBarre();
             }
-            
+
             // Calculer et envoyer le trafic global toutes les secondes
             ticksCompteur++;
             double vitesseTotale = 0.0;
@@ -429,7 +431,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
                     vitesseTotale += t.getVitesseMoS();
                 }
             }
-            
+
             // Animer le déplacement des poussières d'étoiles en arrière-plan
             if (fondParticules != null) {
                 fondParticules.mettreAJour(vitesseTotale);
@@ -438,7 +440,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
             if (ticksCompteur >= 30) {
                 ticksCompteur = 0;
                 statistiquesPanel.getGraphTrafic().ajouterPoint(vitesseTotale);
-                
+
                 // Ordonnancer périodiquement au cas où des éléments en file d'attente attendent
                 moteur.ordonnancer();
             }
@@ -451,11 +453,11 @@ public class MainFrame extends JFrame implements ProgressionListener {
             String path = url.split("\\?")[0];
             String[] segments = path.split("/");
             String dernierSegment = segments[segments.length - 1];
-            
+
             if (dernierSegment.isEmpty() || !dernierSegment.contains(".")) {
                 return "telechargement_" + System.currentTimeMillis();
             }
-            
+
             return java.net.URLDecoder.decode(dernierSegment, "UTF-8");
         } catch (Exception e) {
             return "telechargement_" + System.currentTimeMillis();
@@ -468,7 +470,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
             String cleanUrl = url.split("\\?")[0];
             String[] segments = cleanUrl.split("/");
             String dernierSegment = segments[segments.length - 1];
-            
+
             // Si le dernier segment est vide ou n'a pas d'extension
             if (dernierSegment == null || dernierSegment.isEmpty() || !dernierSegment.contains(".")) {
                 // Générer un nom basé sur le domaine + timestamp
@@ -481,7 +483,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
                     return "telechargement_" + System.currentTimeMillis() + ".file";
                 }
             }
-            
+
             // Décoder les caractères encodés (ex: %20 -> espace)
             return java.net.URLDecoder.decode(dernierSegment, "UTF-8");
         } catch (Exception e) {
@@ -509,7 +511,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
 
         moteur.demarrerTache(tache);
         mettreAJourRecap();
-        
+
         if (bibliothèqueTab != null) {
             bibliothèqueTab.rafraichir();
         }
@@ -543,12 +545,12 @@ public class MainFrame extends JFrame implements ProgressionListener {
     private void exporterRapport() {
         JFileChooser selecteur = new JFileChooser();
         selecteur.setDialogTitle("Exporter le rapport des téléchargements");
-        
+
         // Ajout des filtres de fichiers
         var htmlFilter = new javax.swing.filechooser.FileNameExtensionFilter("Rapport Web HTML (*.html)", "html");
         var pdfFilter = new javax.swing.filechooser.FileNameExtensionFilter("Document PDF (*.pdf)", "pdf");
         var csvFilter = new javax.swing.filechooser.FileNameExtensionFilter("Fichier CSV (*.csv)", "csv");
-        
+
         selecteur.addChoosableFileFilter(htmlFilter);
         selecteur.addChoosableFileFilter(pdfFilter);
         selecteur.addChoosableFileFilter(csvFilter);
@@ -560,7 +562,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
             String path = dest.getAbsolutePath();
             var filtreActuel = selecteur.getFileFilter();
             boolean succes = false;
-            
+
             if (filtreActuel == htmlFilter || path.endsWith(".html")) {
                 if (!path.endsWith(".html")) path += ".html";
                 succes = persistance.exporterHtml(gestionnaireTaches.lister(), path);
@@ -571,10 +573,10 @@ public class MainFrame extends JFrame implements ProgressionListener {
                 if (!path.endsWith(".csv")) path += ".csv";
                 succes = persistance.exporterCsv(gestionnaireTaches.lister(), path);
             }
-            
+
             if (succes) {
                 final String cheminFinal = path;
-                int opt = JOptionPane.showConfirmDialog(this, 
+                int opt = JOptionPane.showConfirmDialog(this,
                         "Rapport exporté avec succès !\nVoulez-vous l'ouvrir maintenant ?",
                         "Export réussi", JOptionPane.YES_NO_OPTION);
                 if (opt == JOptionPane.YES_OPTION) {
@@ -610,7 +612,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
         panelListeTaches.revalidate();
         panelListeTaches.repaint();
         mettreAJourRecap();
-        
+
         if (bibliothèqueTab != null) {
             bibliothèqueTab.rafraichir();
         }
@@ -622,12 +624,12 @@ public class MainFrame extends JFrame implements ProgressionListener {
             if (labelEtatVide.getParent() == panelListeTaches) {
                 panelListeTaches.remove(labelEtatVide);
             }
-            
+
             for (TacheTelechargement t : historique) {
                 t.setListener(this);
                 t.setGestionnaire(gestionnaireTaches);
                 t.setMoteur(moteur);
-                
+
                 if (t.getStatut() == StatutTache.EN_COURS || t.getStatut() == StatutTache.EN_ATTENTE) {
                     try {
                         java.lang.reflect.Field field = TacheTelechargement.class.getDeclaredField("statut");
@@ -636,7 +638,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
                     } catch (Exception ignored) {
                     }
                 }
-                
+
                 gestionnaireTaches.ajouter(t);
 
                 LigneTachePanel ligne = new LigneTachePanel(t, () -> t.annuler());
@@ -648,7 +650,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
             panelListeTaches.revalidate();
             panelListeTaches.repaint();
             mettreAJourRecap();
-            
+
             if (bibliothèqueTab != null) {
                 bibliothèqueTab.rafraichir();
             }
@@ -664,6 +666,7 @@ public class MainFrame extends JFrame implements ProgressionListener {
                 }
                 moteur.annulerToutesLesTaches();
                 persistance.sauvegarder(gestionnaireTaches.lister());
+                DatabaseManager.getInstance().fermer(); // Fermer la connexion MySQL
                 dispose();
                 System.exit(0);
             }
@@ -704,13 +707,16 @@ public class MainFrame extends JFrame implements ProgressionListener {
                 ligne.mettreAJour(tache);
             }
             mettreAJourRecap();
-            
+
             if (bibliothèqueTab != null) {
                 bibliothèqueTab.rafraichir();
             }
-            
+
             // Ordonnancer pour lancer le téléchargement en attente suivant
             moteur.ordonnancer();
+
+            // ── Persistance MySQL : mettre à jour le statut final en base ──
+            gestionnaireTaches.sauvegarderEnBD(tache);
 
             if (tache.getStatut() == StatutTache.ERREUR) {
                 JOptionPane.showMessageDialog(this,
@@ -722,9 +728,9 @@ public class MainFrame extends JFrame implements ProgressionListener {
                         "Succès", JOptionPane.INFORMATION_MESSAGE);
             }
             int choix = JOptionPane.showConfirmDialog(this,
-            "Téléchargement terminé !\nFichier sauvegardé dans : " + dossierTelechargement +
-            "\n\nVoulez-vous ouvrir le fichier ?",
-            "Succès", JOptionPane.YES_NO_OPTION);
+                    "Téléchargement terminé !\nFichier sauvegardé dans : " + dossierTelechargement +
+                            "\n\nVoulez-vous ouvrir le fichier ?",
+                    "Succès", JOptionPane.YES_NO_OPTION);
             if (choix == JOptionPane.YES_OPTION) {
                 ouvrirFichier(tache);
             }

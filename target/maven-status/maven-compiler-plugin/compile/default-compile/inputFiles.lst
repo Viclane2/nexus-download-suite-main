@@ -1,29 +1,31 @@
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/Main.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/GestionnaireTaches.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/ITask.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/ProgressionListener.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/StatutTache.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/TacheTelechargement.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/core/TelechargementEchoueException.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/persistence/GestionnairePersistance.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/persistence/HTMLExporter.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/persistence/IPersistance.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/persistence/PDFExporter.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/threading/MoteurTelechargement.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/HeaderPanel.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/LigneTachePanel.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/MainFrame.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/SplashScreen.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/StatistiquesPanel.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/Theme.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/FadeContainerPanel.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/FuturisticButton.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/FuturisticProgressBar.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/LogoPainter.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/ModernScrollBarUI.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/ParticleBackground.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/components/RealTimeChartPanel.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/tabs/ConsoleTab.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/tabs/DocTab.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/tabs/LibraryTab.java
-/home/viclane/nexus-download-suite-main /nexus-download-suite-main/src/ui/tabs/SettingsTab.java
+/home/viclane/nexus-download-suite-main/src/Main.java
+/home/viclane/nexus-download-suite-main/src/core/GestionnaireTaches.java
+/home/viclane/nexus-download-suite-main/src/core/ITask.java
+/home/viclane/nexus-download-suite-main/src/core/ProgressionListener.java
+/home/viclane/nexus-download-suite-main/src/core/StatutTache.java
+/home/viclane/nexus-download-suite-main/src/core/TacheTelechargement.java
+/home/viclane/nexus-download-suite-main/src/core/TelechargementEchoueException.java
+/home/viclane/nexus-download-suite-main/src/db/DatabaseManager.java
+/home/viclane/nexus-download-suite-main/src/db/HistoriqueDAO.java
+/home/viclane/nexus-download-suite-main/src/persistence/GestionnairePersistance.java
+/home/viclane/nexus-download-suite-main/src/persistence/HTMLExporter.java
+/home/viclane/nexus-download-suite-main/src/persistence/IPersistance.java
+/home/viclane/nexus-download-suite-main/src/persistence/PDFExporter.java
+/home/viclane/nexus-download-suite-main/src/threading/MoteurTelechargement.java
+/home/viclane/nexus-download-suite-main/src/ui/HeaderPanel.java
+/home/viclane/nexus-download-suite-main/src/ui/LigneTachePanel.java
+/home/viclane/nexus-download-suite-main/src/ui/MainFrame.java
+/home/viclane/nexus-download-suite-main/src/ui/SplashScreen.java
+/home/viclane/nexus-download-suite-main/src/ui/StatistiquesPanel.java
+/home/viclane/nexus-download-suite-main/src/ui/Theme.java
+/home/viclane/nexus-download-suite-main/src/ui/components/FadeContainerPanel.java
+/home/viclane/nexus-download-suite-main/src/ui/components/FuturisticButton.java
+/home/viclane/nexus-download-suite-main/src/ui/components/FuturisticProgressBar.java
+/home/viclane/nexus-download-suite-main/src/ui/components/LogoPainter.java
+/home/viclane/nexus-download-suite-main/src/ui/components/ModernScrollBarUI.java
+/home/viclane/nexus-download-suite-main/src/ui/components/ParticleBackground.java
+/home/viclane/nexus-download-suite-main/src/ui/components/RealTimeChartPanel.java
+/home/viclane/nexus-download-suite-main/src/ui/tabs/ConsoleTab.java
+/home/viclane/nexus-download-suite-main/src/ui/tabs/DocTab.java
+/home/viclane/nexus-download-suite-main/src/ui/tabs/LibraryTab.java
+/home/viclane/nexus-download-suite-main/src/ui/tabs/SettingsTab.java

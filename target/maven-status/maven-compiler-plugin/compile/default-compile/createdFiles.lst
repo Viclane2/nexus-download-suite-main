@@ -1,5 +1,6 @@
 ui/components/FuturisticButton.class
 ui/tabs/DocTab.class
+db/DatabaseManager.class
 ui/components/ModernScrollBarUI.class
 ui/Theme.class
 ui/LigneTachePanel.class
@@ -41,6 +42,7 @@ ui/components/ParticleBackground$Particule.class
 persistence/IPersistance.class
 ui/tabs/LibraryTab$1.class
 core/ITask.class
+db/HistoriqueDAO.class
 threading/MoteurTelechargement.class
 ui/tabs/LibraryTab$RenduCelluleProgression.class
 persistence/GestionnairePersistance.class

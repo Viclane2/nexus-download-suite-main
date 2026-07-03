@@ -188,7 +188,7 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
         } catch (IOException e) {
             this.statut = StatutTache.ERREUR;
             this.dateFin = LocalDateTime.now();
-            
+
             // Message d'erreur plus explicite
             String erreurMsg;
             if (e.getMessage().contains("HTTP") && e.getMessage().contains("404")) {
@@ -200,16 +200,16 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
             } else {
                 erreurMsg = "Erreur de téléchargement : " + e.getMessage();
             }
-            
+
             this.vitesseMoS = 0.0;
             this.etaSecondes = -1;
-            
+
             // Nettoyer le fichier partiel
             File fichierPartiel = new File(cheminDestination, nomFichier);
             if (fichierPartiel.exists()) {
                 fichierPartiel.delete();
             }
-            
+
             notifierTerminee();
             // Log l'erreur
             System.err.println("[ERREUR] " + erreurMsg);
@@ -253,7 +253,7 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
         HttpURLConnection conn = null;
         InputStream is = null;
         FileOutputStream fos = null;
-        
+
         try {
             URL urlObj = new URI(urlSource).toURL();
             conn = (HttpURLConnection) urlObj.openConnection();
@@ -326,7 +326,7 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
                     long speedBytes = bytesRead - bytesAtLastSpeedUpdate;
                     double speedMoS = (speedBytes / (elapsedSpeed / 1000.0)) / (1024.0 * 1024.0);
                     this.vitesseMoS = (this.vitesseMoS == 0.0) ? speedMoS : (0.3 * speedMoS + 0.7 * this.vitesseMoS);
-                    
+
                     if (tailleFichier > 0 && this.vitesseMoS > 0) {
                         this.etaSecondes = (long) ((tailleFichier - bytesRead) / (this.vitesseMoS * 1024.0 * 1024.0));
                     } else {
@@ -341,7 +341,7 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
                     lastNotification = now;
                 }
             }
-            
+
         } catch (IOException e) {
             throw e;
         } catch (URISyntaxException e) {
@@ -493,7 +493,7 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
                             long speedBytes = totalBytesAtNow - bytesAtLastSpeedUpdate;
                             double speedMoS = (speedBytes / (elapsedSpeed / 1000.0)) / (1024.0 * 1024.0);
                             vitesseMoS = (vitesseMoS == 0.0) ? speedMoS : (0.3 * speedMoS + 0.7 * vitesseMoS);
-                            
+
                             if (vitesseMoS > 0) {
                                 etaSecondes = (long) ((totalFichierSize - totalBytesAtNow) / (vitesseMoS * 1024.0 * 1024.0));
                             }
@@ -537,6 +537,35 @@ public class TacheTelechargement implements Runnable, Serializable, ITask {
     public String getUrlSource() { return urlSource; }
     public double getVitesseMoS() { return vitesseMoS; }
     public long getEtaSecondes() { return etaSecondes; }
+    public String getCheminDestination() { return cheminDestination; }
+    public LocalDateTime getDateDebut() { return dateDebut; }
+    public LocalDateTime getDateFin() { return dateFin; }
+
+    /**
+     * Méthode factory pour reconstruire une TacheTelechargement
+     * depuis les données de la base (sans relancer le téléchargement).
+     */
+    public static TacheTelechargement depuisBD(
+            String id, String nomFichier, String urlSource, String cheminDestination,
+            double tailleMo, double progression, StatutTache statut,
+            LocalDateTime dateDebut, LocalDateTime dateFin) {
+
+        TacheTelechargement t = new TacheTelechargement(nomFichier, urlSource, cheminDestination);
+        // On écrase l'id aléatoire généré par le constructeur avec celui de la BD
+        try {
+            java.lang.reflect.Field fId = TacheTelechargement.class.getDeclaredField("id");
+            fId.setAccessible(true);
+            fId.set(t, id);
+        } catch (Exception e) {
+            System.err.println("[TacheTelechargement] Impossible de restaurer l'id : " + e.getMessage());
+        }
+        t.tailleTotaleMo = tailleMo;
+        t.progression    = progression;
+        t.statut         = statut;
+        t.dateDebut      = dateDebut;
+        t.dateFin        = dateFin;
+        return t;
+    }
 
     @Override
     public String toString() {
